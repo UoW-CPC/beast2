@@ -48,6 +48,10 @@ RUN echo 'export PS1="[beast2-\u]:\W# "' >> ${ROOT_HOME}/.bashrc
 RUN echo 'export LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH}' >> ${ROOT_HOME}/.bashrc
 WORKDIR /root
 
-ADD reinstall_beagle /usr/local/bin
+COPY reinstall_beagle /usr/local/bin
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-ENTRYPOINT ["/usr/local/beast/bin/beast"]
+ENV FILE beast_data.xml
+ENV DIR .
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
