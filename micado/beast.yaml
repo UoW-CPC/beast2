@@ -10,35 +10,40 @@ repositories:
 description: Run Beast2 in parallel (default 10), on some data stored in an external NFS share.  
 
 
-#########Cloud Compute Details##########
+#########MiCADO Worker Details##########
 dsl_definitions:
-  compute_properties: &compute_properties
-    instance_type: t2.medium 
-    region_name: eu-west-2
-    image_id: ami-006a0174c6c25ac06
-    security_group_ids:
-      - sg-05
-    key_name: key
-    context:
-      insert: true
-      cloud_config: |
-        runcmd:
-        - apt-get install -y nfs-common
+  worker_properties: &worker_properties
+    type: tosca.nodes.MiCADO.EC2.Compute
+    properties:
+      instance_type: t2.medium 
+      region_name: eu-west-2
+      image_id: ami-006a0174c6c25ac06
+      security_group_ids:
+        - sg-05
+      key_name: key
+      context:
+        insert: true
+        cloud_config: |
+          runcmd:
+          - apt-get install -y nfs-common
+    interfaces:
+      Occopus:
+        create:
+          inputs:
+            endpoint: https://ec2.eu-west-2.amazonaws.com
 
-  endpoint_properties: &endpoint_properties
-    endpoint: https://ec2.eu-west-2.amazonaws.com
 
-
-###Basic configuration of NFS & Beast###
 topology_template:
   node_templates:
 
+###########NFS Server Details############
     nfs-volume:
       type: tosca.nodes.MiCADO.Container.Volume.NFS
       properties:
         server: 123.456.7.89
         path: /nfs
-    
+
+#########Advanced configuration##########    
     beast:
       type: tosca.nodes.MiCADO.Container.Application.Docker.Deployment
       properties:      
@@ -46,10 +51,7 @@ topology_template:
         - name: FILE # XML file name
           value: "beast_data.xml"
         - name: DIR # Directory (existing) for this series of experiments
-          value: "exp19052020"
-
-
-#########Advanced configuration##########
+          value: "."
         image: uowcpc/beast2:seeded-ec2
         args: ["-threads -1", "-beagle_sse"]
         workingDir: /root/work
@@ -65,13 +67,7 @@ topology_template:
               properties:
                 location: /root/work
 
-    worker:
-      type: tosca.nodes.MiCADO.EC2.Compute
-      properties: *compute_properties
-      interfaces:
-        Occopus:
-          create:
-            inputs: *endpoint_properties
+    worker: *worker_properties
 
 
 ####Monitoring & Scaling Configuration###
