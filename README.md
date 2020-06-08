@@ -53,7 +53,7 @@ mkdir exp001
 
 *Local Machine*
 ```console
-scp beast_data.xml <NFS_SERVER_IP>:/home/ubuntu/nfs/exp001/beast_data.xml
+scp beast_data.xml <username>@<NFS_SERVER_IP>:/home/ubuntu/nfs/exp001/beast_data.xml
 ```
 
 In the NFS share, create a subdirectory for the experiment output. Copy the XML data to it.
